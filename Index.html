@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>GPS with OpenLayers</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@7.4.0/ol.css?v={version}" />
+<style>
+body {{ margin:0; padding:0; font-family: Arial, sans-serif; }}
+#map {{ width: 100vw; height: 88vh; }}
+header {{ padding: 8px; background:#222; color:white; display:flex; gap:8px; align-items:center; }}
+.btn {{ background:#2196f3; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; }}
+.status {{ margin-left: auto; font-size:0.9rem; opacity:0.9; }}
+</style>
+</head>
+<body>
+<header>
+<div><strong>GPS — OpenLayers</strong></div>
+<button class="btn" id="btn-center">📍 Center</button>
+<button class="btn" id="btn-follow">▶ Follow: OFF</button>
+<div class="status" id="status">Waiting for GPS...</div>
+</header>
+<div id="map"></div>
+<script src="https://cdn.jsdelivr.net/npm/ol@7.4.0/dist/ol.js?v={version}"></script>
+<script>
+const map = new ol.Map({{
+  target: 'map',
+  layers: [new ol.layer.Tile({{ source: new ol.source.OSM() }})],
+  view: new ol.View({{ center: ol.proj.fromLonLat([-46.633308, -23.55052]), zoom: 14 }})
+}});
+const vectorSource = new ol.source.Vector();
+map.addLayer(new ol.layer.Vector({{ source: vectorSource }}));
+
+const markerStyle = new ol.style.Style({{
+  image: new ol.style.Circle({{ radius: 8, fill: new ol.style.Fill({{ color: '#ff5722' }}), stroke: new ol.style.Stroke({{ color: '#fff', width: 2 }}) }})
+}});
+const accuracyStyle = new ol.style.Style({{
+  fill: new ol.style.Fill({{ color: 'rgba(33,150,243,0.1)' }}),
+  stroke: new ol.style.Stroke({{ color: 'rgba(33,150,243,0.6)', width: 1 }})
+}});
+
+let markerFeature = null;
+let accuracyFeature = null;
+let watchId = null;
+let following = false;
+let currentPos = null;
+
+const statusEl = document.getElementById('status');
+const btnFollow = document.getElementById('btn-follow');
+
+function updateStatus(text) {{ statusEl.textContent = text; }}
+
+function handlePosition(pos) {{
+  const lat = pos.coords.latitude;
+  const lon = pos.coords.longitude;
+  const coord = ol.proj.fromLonLat([lon, lat]);
+  currentPos = [lon, lat];
+
+  if (!markerFeature) {{
+    markerFeature = new ol.Feature(new ol.geom.Point(coord));
+    markerFeature.setStyle(markerStyle);
+    vectorSource.addFeature(markerFeature);
+  }} else {{
+    markerFeature.getGeometry().setCoordinates(coord);
+  }}
+
+  if (!accuracyFeature) {{
+    accuracyFeature = new ol.Feature(new ol.geom.Circle(coord, pos.coords.accuracy));
+    accuracyFeature.setStyle(accuracyStyle);
+    vectorSource.addFeature(accuracyFeature);
+  }} else {{
+    accuracyFeature.getGeometry().setCenter(coord);
+    accuracyFeature.getGeometry().setRadius(pos.coords.accuracy);
+  }}
+
+  updateStatus(`Lat: ${{lat.toFixed(6)}} Lon: ${{lon.toFixed(6)}} Acc: ${{pos.coords.accuracy}}m`);
+
+  if (following) {{
+    map.getView().animate({{ center: coord, zoom: Math.max(map.getView().getZoom(), 16), duration: 300 }});
+  }}
+}}
+
+function handleError(err) {{
+  console.error(err);
+  if(err.code === 1) updateStatus('Permission denied to access GPS.');
+  else updateStatus('Error obtaining GPS: ' + (err.message || err.code));
+}}
+
+function startWatching() {{
+  if (!('geolocation' in navigator)) {{ updateStatus('Geolocation not supported.'); return; }}
+  watchId = navigator.geolocation.watchPosition(handlePosition, handleError, {{ enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }});
+}}
+
+function getCurrentOnceAndStartWatch() {{
+  if (!('geolocation' in navigator)) {{ updateStatus('Geolocation not supported.'); return; }}
+  navigator.geolocation.getCurrentPosition((pos) => {{
+    handlePosition(pos);
+    map.getView().animate({{ center: ol.proj.fromLonLat([pos.coords.longitude, pos.coords.latitude]), zoom: 16, duration: 400 }});
+    startWatching();
+  }}, handleError, {{ enableHighAccuracy: true, timeout: 10000 }});
+}}
+
+document.getElementById('btn-center').addEventListener('click', () => {{
+  if (markerFeature) map.getView().animate({{ center: markerFeature.getGeometry().getCoordinates(), zoom: 16, duration: 300 }});
+  else getCurrentOnceAndStartWatch();
+}});
+btnFollow.addEventListener('click', () => {{
+  following = !following;
+  btnFollow.textContent = following ? '▶ Follow: ON' : '▶ Follow: OFF';
+}});
+
+getCurrentOnceAndStartWatch();
+
+// ============================
+// Capture map click to generate route
+// ============================
+map.on('singleclick', function(evt) {{
+  const [lon2, lat2] = ol.proj.toLonLat(evt.coordinate);
+  if (!currentPos) return alert('Current position not yet available.');
+
+  fetch('/rota', {{
+    method: 'POST',
+    headers: {{ 'Content-Type': 'application/json' }},
+    body: JSON.stringify({{ origem: currentPos, destino: [lon2, lat2] }})
+  }})
+  .then(r => r.json())
+  .then(data => {{
+    if (data.error) return alert('Error generating route: ' + data.error);
+    const rota = new ol.format.GeoJSON().readFeatures(data, {{ featureProjection: map.getView().getProjection() }});
+    const rotaLayer = new ol.layer.Vector({{
+      source: new ol.source.Vector({{ features: rota }}),
+      style: new ol.style.Style({{
+        stroke: new ol.style.Stroke({{ color: 'blue', width: 3 }})
+      }})
+    }});
+    map.addLayer(rotaLayer);
+    console.log("Route successfully generated!");
+  }})
+  .catch(err => console.error('Error generating route:', err));
+}});
+</script>
+</body>
+</html>
