@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template_string, jsonify
+from flask import Flask, request, render_template, jsonify
 from pyngrok import ngrok
 import csv, os, time
 from threading import Thread
@@ -8,6 +8,7 @@ CSV_FILE = "gps_data.csv"
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
+# Create CSV if it does not exist
 if not os.path.exists(CSV_FILE):
     with open(CSV_FILE, "w", newline="") as f:
         writer = csv.writer(f)
@@ -16,48 +17,56 @@ if not os.path.exists(CSV_FILE):
 @app.route('/')
 def index():
     version = int(time.time())
-    return render_template_string(f"""...""")
+    return render_template("index.html", version=version)
 
 @app.route('/update_gps', methods=['POST'])
 def update_gps():
-    data = request.get_json()  # Receives the data sent via POST in JSON format
-    with open(CSV_FILE, "a", newline="") as f:  # Opens the CSV file in append mode and writes the received data
+    data = request.get_json()
+    with open(CSV_FILE, "a", newline="") as f:
         writer = csv.writer(f)
         writer.writerow([data.get('lat'), data.get('lon'), data.get('alt'), data.get('timestamp')])
-    print(f"✔ Recebido: {data}")  # Prints the received data in the terminal
-    return "OK"  # Returns "OK" to the client that made the request
+    print(f"✔ Received: {data}")
+    return "OK"
 
-# ===========================
-# OpenRouteService intermediary route with error handling
-# ===========================
 @app.route('/rota', methods=['POST'])
-def rota():
+def route():
     try:
-        data = request.get_json()  # Receives the data sent via POST in JSON format
-        if 'origem' not in data or 'destino' not in data:  # Checks if the data contains 'origem' and 'destino'
-            return jsonify({"error": "Dados incompletos"}), 400  # Returns error 400 if any data is missing
+        data = request.get_json()
+        if 'origem' not in data or 'destino' not in data:
+            return jsonify({"error": "Missing data"}), 400
 
-        body = {"coordinates": [data['origem'], data['destino']]}  # Builds the request body for the OpenRouteService API
+        # Get OpenRouteService API key from environment variable
+        api_key = os.getenv("ORS_API_KEY")
+        if not api_key:
+            return jsonify({"error": "API key not set in environment variable ORS_API_KEY"}), 500
+
+        body = {"coordinates": [data['origem'], data['destino']]}
         headers = {
-            "Authorization": "PUT_YOUR_AUTHENTIC_KEY",
+            "Authorization": api_key,
             "Content-Type": "application/json"
         }
+
         resp = requests.post(
             "https://api.openrouteservice.org/v2/directions/driving-car/geojson",
             json=body,
             headers=headers
         )
-        resp.raise_for_status()  # Ensures the response has no HTTP error (raises exception if it does)
-        return jsonify(resp.json())  # Returns the JSON received from the API to the client
+        resp.raise_for_status()
+        return jsonify(resp.json())
+
     except Exception as e:
-        print("Erro no endpoint /rota:", e)  # In case of any error, prints it in the terminal
-        return jsonify({"error": str(e)}), 500  # Returns error 500 to the client
+        print("Error in /rota endpoint:", e)
+        return jsonify({"error": str(e)}), 500
 
 def start_server():
-    app.run(port=5000, debug=False)  # Starts the Flask server
+    app.run(port=5000, debug=False)
 
-Thread(target=start_server).start()  # Starts the Flask server in a separate thread
-ngrok.set_auth_token("PUT_YOUR_AUTHENTIC_KEY")  # Sets the ngrok auth token
-public_url = ngrok.connect(5000)  # Creates the ngrok tunnel on port 5000 and gets the public link
-print("🌍 Your website is accessible at this public link  (via ngrok):")
-print(public_url)  # Prints the public link in the terminal
+# Start Flask in a separate thread
+Thread(target=start_server).start()
+
+# Setup ngrok
+ngrok.set_auth_token(os.getenv("NGROK_AUTH_TOKEN", ""))  # optional
+public_url = ngrok.connect(5000)
+
+print("🌍 Your website is accessible at this public link (via ngrok):")
+print(public_url)
