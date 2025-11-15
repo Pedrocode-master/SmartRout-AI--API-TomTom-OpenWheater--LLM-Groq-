@@ -1,4 +1,4 @@
-GPS Full-Stack with OpenLayers and Routing API
+qGPS Full-Stack with OpenLayers and Routing API
 
 Overview
 
@@ -76,6 +76,14 @@ Generate a route: Tap/click on a point on the map. The route from your current l
 
 Center map manually: Use the "Centralizar" button to focus the map on your location.
 
+Added input fields for origin and destination street names.
+
+The system uses geocoding to convert typed addresses into coordinates.
+
+Routes are now generated from the entered origin to the entered destination.
+
+Clicking on the map still works as a fallback if no address is provided.
+
 
 CSV Logging
 
@@ -101,9 +109,7 @@ CSV	Stores GPS tracking data locally in gps_data.csv
 
 Notes / Limitations
 
-Currently, every tap/click on the map generates a route from your current location to the selected destination. Future improvements are planned to better manage map interactions, such as distinguishing between taps, drags, and other gestures for a more intuitive experience.
 
-Route management: Right now, multiple routes can overlap because each new route is added on top of the previous ones. A future update will include functionality to replace the old route with the new one to avoid clutter and improve clarity.
 
 This project is actively under development. Additional features will be implemented to make the map more interactive, including new types of user interactions, better visualization of routes, and enhanced GPS tracking behaviors.
 
