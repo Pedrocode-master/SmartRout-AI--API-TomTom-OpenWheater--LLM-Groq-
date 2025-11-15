@@ -139,7 +139,3 @@ This project is licensed under the MIT License.
 
 
 ---
-
-Se você quiser, eu posso também gerar uma versão do README com seções curtas para iniciantes, com mais imagens ou gifs de como a aplicação funciona, para deixar mais visual.
-
-Quer que eu faça essa versão visual também?
