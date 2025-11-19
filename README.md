@@ -66,5 +66,7 @@ The easiest and most recommended way to run this application is via Google Colab
  * Backend: Python 3.8+
  * Python Libraries: Flask, pyngrok, requests
  * Frontend: OpenLayers v7.4.0 (Mapping and Geometry)
+
+   ---
 🤝 Contributions
 Contributions are welcome! If you have suggestions to improve the routing logic, Flask stability, or Colab integration, feel free to open an Issue or submit a Pull Request.
