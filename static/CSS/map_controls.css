@@ -1,0 +1,24 @@
+/* static/css/map_controls.css */
+/* Estilos para os controles de rota */
+#controls {
+  position: absolute;
+  top: 10px;
+  right: 10px; /* Alterado de 'left: 10px;' para 'right: 10px;' */
+  z-index: 1000;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+#controls input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+#rota {
+  width: 100%;
+  padding: 10px 12px;
+}
