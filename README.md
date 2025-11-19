@@ -1,7 +1,13 @@
 🧭 Project: Interactive GPS Tracking and Mapping System
+---
+
 📝 Description
 This project is an interactive web application developed using Python (Flask) and JavaScript (OpenLayers) for the visualization and tracking of real-time geospatial data.
+---
+
 The system has been modularized and optimized for rapid execution and debugging in cloud-based environments like Google Colab, leveraging Google Drive as the persistent file system and ngrok to create a public access tunnel.
+
+---
 ✨ Highlights and New Features (Change Log)
 This section emphasizes the significant improvements made to the project:
 | Feature | Status | Change / Improvement |
@@ -28,6 +34,9 @@ The easiest and most recommended way to run this application is via Google Colab
  * Install dependencies: pip install -r requirements.txt.
  * Set environment variables (NGROK_AUTH_TOKEN, ORS_API_KEY).
  * Execute: python app.py.
+
+
+---
 🗂️ Code Structure
 seu_projeto_gps/
 ├── app.py           # Main Flask application (routes, server, ngrok)
@@ -47,6 +56,9 @@ seu_projeto_gps/
         ├── map_init.js
         └── ...
 
+
+
+----
 ⚙️ Dependencies
  * Backend: Python 3.8+
  * Python Libraries: Flask, pyngrok, requests
