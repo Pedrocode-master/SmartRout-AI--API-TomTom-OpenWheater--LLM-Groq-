@@ -1,0 +1,34 @@
+/* ------------------------------------------------------------------- */
+/* CSS CRÍTICO PARA GARANTIR QUE O MAPA OCUPE 100% DA TELA */
+/* ------------------------------------------------------------------- */
+
+html, body {
+    height: 100%; /* CRÍTICO: Garante que o corpo da página use toda a altura da janela */
+    margin: 0;
+    padding: 0;
+    /* Impede barras de rolagem desnecessárias */
+    overflow: hidden;
+}
+
+/* O contêiner principal do mapa */
+#map {
+    width: 100%;
+    height: 100%; /* ESTE É O PONTO CRÍTICO para o OpenLayers */
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0; /* Garante que fique atrás de outros elementos, como o header */
+}
+
+/* ------------------------------------------------------------------- */
+/* Outros estilos do seu projeto podem ser adicionados abaixo. */
+/* ------------------------------------------------------------------- */
+/* Exemplo para o header */
+.header {
+    position: relative;
+    z-index: 10;
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
