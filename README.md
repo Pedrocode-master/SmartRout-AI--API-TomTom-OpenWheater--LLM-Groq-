@@ -1,147 +1,55 @@
-qGPS Full-Stack with OpenLayers and Routing API
-
-Overview
-
-This project is a full-stack GPS application that tracks your location, displays it on an interactive map, and allows routing between points using the OpenRouteService API. It combines a Python Flask back-end with a front-end built with OpenLayers for map visualization.
-
-Unlike typical setups, this project was developed and executed entirely on Google Colab, which is why PyNGrok is used to expose a public URL for the Flask server.
-
-
----
-
-Features
-
-Real-time GPS tracking and accuracy visualization.
-
-Map interaction: click/tap on a location to generate a route from your current position.
-
-Full integration with OpenRouteService for driving directions.
-
-Mobile-friendly map interface.
-
-Ability to follow your movement automatically or manually center the map.
-
-Data logging to a CSV file (gps_data.csv) for later analysis.
-
-
-
----
-
-Why Google Colab and PyNGrok?
-
-Since this project was developed without a local computer, Google Colab was used as the development environment.
-To make the Flask app accessible externally (since Colab cannot directly serve web apps), PyNGrok is used to create a temporary public URL. This allows you to interact with the map from your mobile or any device with internet access.
-
-
----
-
-Installation / Setup
-
-1. Clone the repository:
-
-
-
-git clone https://github.com/YOUR_USERNAME/gps-fullstack-openlayers.git
-cd gps-fullstack-openlayers
-
-2. Install dependencies:
-
-
-
-pip install flask pyngrok requests
-
-3. Run the Flask app in Google Colab:
-
-
-
-Open the Colab notebook.
-
-Make sure you provide your OpenRouteService API key in the variable ORS_API_KEY.
-
-Execute the cells to start the server.
-
-Copy the public URL provided by PyNGrok and open it in your browser (mobile recommended).
-
-
-
----
-
-Usage
-
-Map Interaction
-
-Follow your location: Toggle the "Follow" button to automatically center the map on your current GPS position.
-
-Generate a route: Tap/click on a point on the map. The route from your current location to the selected destination will be displayed.
-
-Center map manually: Use the "Centralizar" button to focus the map on your location.
-
-Added input fields for origin and destination street names.
-
-The system uses geocoding to convert typed addresses into coordinates.
-
-Routes are now generated from the entered origin to the entered destination.
-
-Clicking on the map still works as a fallback if no address is provided.
-
-
-CSV Logging
-
-Your GPS data (latitude, longitude, altitude, timestamp) is automatically saved to gps_data.csv every time your position is updated.
-
-
----
-
-Key Libraries and Tools
-
-Tool / Library	Purpose
-
-Flask	Python web framework for back-end routes and API
-PyNGrok	Exposes Colab Flask server to the internet via a public URL
-OpenLayers	Interactive map library for front-end map rendering
-OpenRouteService	Provides route calculations and directions via API
-Requests	Handles HTTP requests to OpenRouteService API
-CSV	Stores GPS tracking data locally in gps_data.csv
-
-
-
----
-
-Notes / Limitations
-
-
-
-This project is actively under development. Additional features will be implemented to make the map more interactive, including new types of user interactions, better visualization of routes, and enhanced GPS tracking behaviors.
-
-The project is optimized for mobile devices, but desktop usage is also possible.
-
-Make sure you have a valid OpenRouteService API key; otherwise, route generation will return a 403 Forbidden error.
-
-
----
-
-Project Structure
-
-gps-fullstack-openlayers/
-│
-├── main.py               # Flask + OpenLayers app
-├── gps_data.csv          # CSV file storing GPS logs
-├── README.md             # This file
-└── requirements.txt      # Python dependencies
-
-
----
-
-Contributing
-
-This is a personal project under active development. Contributions, suggestions, or bug reports are welcome. Please ensure that API keys are not shared publicly.
-
-
----
-
-License
-
-This project is licensed under the MIT License.
-
-
----
+🧭 Project: Interactive GPS Tracking and Mapping System
+📝 Description
+This project is an interactive web application developed using Python (Flask) and JavaScript (OpenLayers) for the visualization and tracking of real-time geospatial data.
+The system has been modularized and optimized for rapid execution and debugging in cloud-based environments like Google Colab, leveraging Google Drive as the persistent file system and ngrok to create a public access tunnel.
+✨ Highlights and New Features (Change Log)
+This section emphasizes the significant improvements made to the project:
+| Feature | Status | Change / Improvement |
+|---|---|---|
+| Architecture | ✅ Modularized | Complete code restructuring into separate modules (app.py, config.py, utils.py) for better organization, maintainability, and testing. |
+| Front-end | ✅ Separated | Separation of HTML into templates (header.html, map.html, etc.) and CSS/JS into dedicated static/ folders, following the standard Flask (Jinja2) pattern. |
+| Infrastructure | ✅ Cloud-Optimized | Configuration to run directly on Google Colab, using drive.mount() and os.chdir() to access and persistently save data in Google Drive. |
+| Deployment | ✅ Public Access | Automatic configuration of the pyngrok tunnel within app.py to generate an instant public access URL. |
+| Data | ✅ Persistence | Implementation of logic in utils.py to ensure secure writing of GPS data into a CSV file stored in Google Drive. |
+💻 How to Run the Project (Quick Guide)
+The easiest and most recommended way to run this application is via Google Colab:
+1. Prerequisites
+ * A Google account (for access to Drive and Colab).
+ * An OpenRouteService (ORS) API key for routing functionality (or use the test key included).
+2. Execution via Colab (Recommended Method)
+ * Open a new notebook in Google Colab.
+ * Copy and paste the automated initialization script (SETUP_SCRIPT.py) that handles file creation and environment configuration (This script is not included here, but you have it from previous sessions).
+ * Execute the cell.
+ * When prompted, authorize mounting your Google Drive.
+ * The script will install dependencies, save all project files into the seu_projeto_gps folder in your Drive, and start the Flask server.
+ * Click the public ngrok link provided in the output to access the application.
+3. Local Execution (Alternative)
+ * Clone the repository.
+ * Install dependencies: pip install -r requirements.txt.
+ * Set environment variables (NGROK_AUTH_TOKEN, ORS_API_KEY).
+ * Execute: python app.py.
+🗂️ Code Structure
+seu_projeto_gps/
+├── app.py           # Main Flask application (routes, server, ngrok)
+├── config.py        # Configuration and keys (tokens, ORS API)
+├── utils.py         # Data handling functions (CSV logging)
+├── requirements.txt # Python dependencies (Flask, pyngrok, requests)
+├── templates/
+│   ├── index.html   # Main template (Jinja2)
+│   ├── header.html  # Header/controls component
+│   ├── map.html     # Map container
+│   └── bottom_sheet.html # Route details component
+└── static/
+    ├── css/         # CSS styles
+    │   ├── main.css
+    │   └── ...
+    └── js/          # JavaScript logic (OpenLayers)
+        ├── map_init.js
+        └── ...
+
+⚙️ Dependencies
+ * Backend: Python 3.8+
+ * Python Libraries: Flask, pyngrok, requests
+ * Frontend: OpenLayers v7.4.0 (Mapping and Geometry)
+🤝 Contributions
+Contributions are welcome! If you have suggestions to improve the routing logic, Flask stability, or Colab integration, feel free to open an Issue or submit a Pull Request.
